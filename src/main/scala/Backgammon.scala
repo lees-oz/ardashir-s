@@ -1,6 +1,8 @@
-import Chips.Player.{BLACK, WHITE}
+import Backgammon.Player.{BLACK, WHITE}
 
-object Chips extends App {
+object Backgammon extends App {
+
+
 
   val CELLS = 24
   val CHIPS = 12
@@ -22,7 +24,7 @@ object Chips extends App {
 
   case class Chip(path: Int)
 
-  
+
 
   case class Board(chips: Map[Player, List[Chip]]) {
     def move(m: Move): Either[Error, Board] = {
