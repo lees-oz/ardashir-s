@@ -19,8 +19,8 @@ class BoardSpec extends FunSpec with Matchers {
 
   it("both players can step to the end") {
     startBoard
-      .move(Move(WHITE, 0, CELLS))
-      .flatMap(_.move(Move(BLACK, 0, CELLS / 2)))
+      .move(Move(WHITE, 0, CELLS - 1))
+      .flatMap(_.move(Move(BLACK, 0, CELLS / 2 - 1)))
       .isRight shouldBe true
   }
 
@@ -34,7 +34,7 @@ class BoardSpec extends FunSpec with Matchers {
     startBoard
       .move(Move(WHITE, 0, 6))
       .flatMap(_.move(Move(BLACK, 0, 2)))
-      .flatMap(_.move(Move(WHITE, 6, 8)))
+      .flatMap(_.move(Move(WHITE, 6, 14)))
       .isLeft shouldBe true
   }
 

@@ -16,7 +16,7 @@
     }
   }
 
-  case class Move(player: Player, from: Int, steps: Int)
+  case class Move(player: Player, from: Int, to: Int)
 
   case class Chip(path: Int)
 
@@ -28,7 +28,7 @@
         // if finishing path, all chips should be in dome
         _ <- findDest(m)
       } yield Board(Map(
-        m.player -> chips(m.player).updated(targetChipIdx, Chip(m.from + m.steps)),
+        m.player -> chips(m.player).updated(targetChipIdx, Chip(m.to)),
         m.player.opponent -> chips(m.player.opponent),
       ))
     }
@@ -40,8 +40,8 @@
     }
 
     private def findDest(move: Move): Either[Error, Unit] = {
-      val dest = Math.min(move.from + move.steps, CELLS)
-      if (dest == CELLS || !chips(move.player.opponent).exists(_.path == dest - CELLS / 2)) Right(())
+      val dest = Math.min(move.to, CELLS - 1)
+      if (dest == CELLS - 1 || !chips(move.player.opponent).exists(_.path == dest - CELLS / 2)) Right(())
       else Left(new Error(s"There's opponent's chip at destination path $dest"))
     }
 
