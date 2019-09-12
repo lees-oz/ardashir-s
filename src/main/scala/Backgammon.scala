@@ -1,8 +1,4 @@
-import Backgammon.Player.{BLACK, WHITE}
-
-object Backgammon extends App {
-
-
+  object Backgammon {
 
   val CELLS = 24
   val CHIPS = 12
@@ -23,8 +19,6 @@ object Backgammon extends App {
   case class Move(player: Player, from: Int, steps: Int)
 
   case class Chip(path: Int)
-
-
 
   case class Board(chips: Map[Player, List[Chip]]) {
     def move(m: Move): Either[Error, Board] = {
@@ -54,45 +48,4 @@ object Backgammon extends App {
     private def winner: Option[Player] = chips
       .find((p: (Player, List[Chip])) => p._2.forall(_.path == CELLS)).map(_._1)
   }
-
-
-
-  // Tests
-  val startBoard: Board = Board(Map(
-    WHITE -> (1 to CHIPS).map(_ => Chip(0)).toList,
-    BLACK -> (1 to CHIPS).map(_ => Chip(0)).toList,
-  ))
-
-  // Can't step on opponents chip
-  println(
-    startBoard
-      .move(Move(WHITE, 0, 12))
-      .isLeft
-  )
-
-  // Can't move on opponents chip
-  println(
-    startBoard
-      .move(Move(WHITE, 0, 6))
-      .flatMap(_.move(Move(BLACK, 0, 2)))
-      .flatMap(_.move(Move(WHITE, 6, 8)))
-      .isLeft
-  )
-
-  // Can move to non-occupied
-  println(
-    startBoard
-      .move(Move(WHITE, 0, 6))
-      .flatMap(_.move(Move(WHITE, 0, 6)))
-      .flatMap(_.move(Move(WHITE, 6, 5)))
-      .isRight
-  )
-
-  // Both players can step to the end
-  println(
-    startBoard
-      .move(Move(WHITE, 0, CELLS))
-      .flatMap(_.move(Move(BLACK, 0, CELLS / 2)))
-//      .isRight
-  )
 }
