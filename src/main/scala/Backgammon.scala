@@ -1,15 +1,12 @@
 import Backgammon.GameException.{AllChipsMustBeInDome, MoveDestinationNotAvailable, MoveTargetNotAvailable}
+import Backgammon.Player.{BLACK, WHITE}
 
 object Backgammon {
-
-  val CELLS = 24
-  val CHIPS = 12
-
   sealed trait GameException extends Throwable
   object GameException {
-    case object MoveTargetNotAvailable extends GameException
-    case object MoveDestinationNotAvailable extends GameException
-    case object AllChipsMustBeInDome extends GameException
+    final case object MoveTargetNotAvailable extends GameException
+    final case object MoveDestinationNotAvailable extends GameException
+    final case object AllChipsMustBeInDome extends GameException
   }
 
   sealed trait Player {
@@ -29,7 +26,12 @@ object Backgammon {
 
   case class Chip(path: Int)
 
-  case class Board(chips: Map[Player, List[Chip]]) {
+  case class BackgammonConfig(cells: Int, chips: Int)
+
+  case class Board(chips: Map[Player, List[Chip]])(implicit val config: BackgammonConfig) {
+    private val CELLS = config.cells
+    private val CHIPS = config.chips
+
     def move(m: Move): Either[GameException, Board] = {
       for {
         chipIndex <- findTargetChip(m)
@@ -60,5 +62,14 @@ object Backgammon {
 
     private def winner: Option[Player] = chips
       .find((p: (Player, List[Chip])) => p._2.forall(_.path == CELLS)).map(_._1)
+  }
+
+  object Board {
+    def init(implicit config: BackgammonConfig): Board = {
+      Board(Map(
+        WHITE -> (1 to config.chips).map(_ => Chip(0)).toList,
+        BLACK -> (1 to config.chips).map(_ => Chip(0)).toList,
+      ))
+    }
   }
 }
