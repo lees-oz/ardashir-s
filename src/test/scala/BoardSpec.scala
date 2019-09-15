@@ -1,4 +1,4 @@
-import Backgammon.GameException.{MoveDestinationNotAvailable, MoveTargetNotAvailable}
+import Backgammon.GameException.{AllChipsMustBeInDome, MoveDestinationNotAvailable, MoveTargetNotAvailable}
 import Backgammon.{Board, CELLS, Chip, Move}
 import Backgammon.Player.{BLACK, WHITE}
 import org.scalatest.{FunSpec, Matchers}
@@ -18,12 +18,45 @@ class BoardSpec extends FunSpec with Matchers {
       .isRight shouldBe true
   }
 
-  it("both players can step to the end") {
+  it("can step to end only if all chips in dome") {
     startBoard
       .move(Move(WHITE, 0, CELLS - 1))
-      .flatMap(_.move(Move(BLACK, 0, CELLS / 2 - 1)))
+      .flatMap(_.move(Move(WHITE, 0, CELLS - 1)))
+      .flatMap(_.move(Move(WHITE, 0, CELLS - 1)))
+      .flatMap(_.move(Move(WHITE, 0, CELLS - 1)))
+      .flatMap(_.move(Move(WHITE, 0, CELLS - 1)))
+      .flatMap(_.move(Move(WHITE, 0, CELLS - 1)))
+      .flatMap(_.move(Move(WHITE, 0, CELLS - 1)))
+      .flatMap(_.move(Move(WHITE, 0, CELLS - 1)))
+      .flatMap(_.move(Move(WHITE, 0, CELLS - 1)))
+      .flatMap(_.move(Move(WHITE, 0, CELLS - 1)))
+      .flatMap(_.move(Move(WHITE, 0, CELLS - 1)))
+      .flatMap(_.move(Move(WHITE, 0, CELLS - 1)))
+      .flatMap(_.move(Move(WHITE, CELLS - 1, CELLS)))
       .isRight shouldBe true
   }
+
+  it("can't step to end if not all chips in dome") {
+    startBoard
+      .move(Move(WHITE, 0, CELLS)) shouldBe Left(AllChipsMustBeInDome)
+  }
+
+  it("can't step to end when at least one isn't in dome") {
+    startBoard
+      .move(Move(WHITE, 0, CELLS - 1))
+      .flatMap(_.move(Move(WHITE, 0, CELLS - 1)))
+      .flatMap(_.move(Move(WHITE, 0, CELLS - 1)))
+      .flatMap(_.move(Move(WHITE, 0, CELLS - 1)))
+      .flatMap(_.move(Move(WHITE, 0, CELLS - 1)))
+      .flatMap(_.move(Move(WHITE, 0, CELLS - 1)))
+      .flatMap(_.move(Move(WHITE, 0, CELLS - 1)))
+      .flatMap(_.move(Move(WHITE, 0, CELLS - 1)))
+      .flatMap(_.move(Move(WHITE, 0, CELLS - 1)))
+      .flatMap(_.move(Move(WHITE, 0, CELLS - 1)))
+      .flatMap(_.move(Move(WHITE, 0, CELLS - 1)))
+      .flatMap(_.move(Move(WHITE, CELLS - 1, CELLS))) shouldBe Left(AllChipsMustBeInDome)
+  }
+
 
   it("can't step on opponents chip 1") {
     startBoard.move(Move(WHITE, 0, 12)) shouldBe Left(MoveDestinationNotAvailable)

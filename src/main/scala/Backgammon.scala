@@ -1,4 +1,4 @@
-import Backgammon.GameException.{MoveDestinationNotAvailable, MoveTargetNotAvailable}
+import Backgammon.GameException.{AllChipsMustBeInDome, MoveDestinationNotAvailable, MoveTargetNotAvailable}
 
 object Backgammon {
 
@@ -32,26 +32,30 @@ object Backgammon {
   case class Board(chips: Map[Player, List[Chip]]) {
     def move(m: Move): Either[GameException, Board] = {
       for {
-        chipIndex <- findChip(m)
-        // find new path, if available - Option[Int]
-        // if finishing path, all other chips should be in dome
-        _ <- findDest(m)
+        chipIndex <- findTargetChip(m)
+        _ <- findDestination(m)
+        _ <- allChipsMustBeInDome(m)
       } yield Board(Map(
         m.player -> chips(m.player).updated(chipIndex, Chip(m.to)),
         m.player.opponent -> chips(m.player.opponent),
       ))
     }
 
-    private def findChip(move: Move): Either[GameException, Int] = {
+    private def findTargetChip(move: Move): Either[GameException, Int] = {
       val targetChipIdx = chips(move.player).indexWhere(_.path == move.from)
       if (targetChipIdx != -1) Right(targetChipIdx)
       else Left(MoveTargetNotAvailable)
     }
 
-    private def findDest(move: Move): Either[GameException, Unit] = {
-      val dest = Math.min(move.to, CELLS - 1)
-      if (dest == CELLS - 1 || !chips(move.player.opponent).exists(_.path == dest - CELLS / 2)) Right(())
-      else Left(MoveDestinationNotAvailable)
+    private def findDestination(move: Move): Either[GameException, Unit] = {
+      val dest = Math.min(move.to, CELLS)
+      if (dest < CELLS && chips(move.player.opponent).exists(_.path == dest - CELLS / 2)) Left(MoveDestinationNotAvailable)
+      else Right(())
+    }
+
+    private def allChipsMustBeInDome(move: Move): Either[GameException, Unit] = {
+      if (move.to >= CELLS && chips(move.player).exists(_.path < CELLS / 2)) Left(AllChipsMustBeInDome)
+      else Right(())
     }
 
     private def winner: Option[Player] = chips
