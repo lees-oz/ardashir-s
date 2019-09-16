@@ -1,4 +1,4 @@
-import Backgammon.GameException.{AllChipsMustBeInDome, MoveDestinationNotAvailable, MoveTargetNotAvailable}
+import Backgammon.GameException.{AllChipsMustBeInDome, MoveDestinationNotAvailable, MoveTargetNotAvailable, ShouldMoveForward}
 import Backgammon.Player.{BLACK, WHITE}
 
 object Backgammon {
@@ -7,6 +7,7 @@ object Backgammon {
     final case object MoveTargetNotAvailable extends GameException
     final case object MoveDestinationNotAvailable extends GameException
     final case object AllChipsMustBeInDome extends GameException
+    final case object ShouldMoveForward extends GameException
   }
 
   sealed trait Player {
@@ -34,6 +35,7 @@ object Backgammon {
 
     def move(m: Move): Either[GameException, Board] = {
       for {
+        _ <- moveIsForward(m)
         chipIndex <- findTargetChip(m)
         _ <- findDestination(m)
         _ <- allChipsMustBeInDome(m)
@@ -57,6 +59,11 @@ object Backgammon {
 
     private def allChipsMustBeInDome(move: Move): Either[GameException, Unit] = {
       if (move.to >= CELLS && chips(move.player).exists(_.path < CELLS / 2)) Left(AllChipsMustBeInDome)
+      else Right(())
+    }
+
+    private def moveIsForward(move: Move): Either[GameException, Unit] = {
+      if(move.from >= move.to) Left(ShouldMoveForward)
       else Right(())
     }
 
